@@ -26,14 +26,15 @@ pub struct RequestBuilder {
 }
 
 impl RequestBuilder {
-    pub fn new() -> Self {
-        Self {
+    pub fn new(model: String, messages: Vec<Message>) -> anyhow::Result<Self> {
+        anyhow::ensure!(messages.len() > 0, "message cannot be empty");
+        Ok(Self {
             logit_bias: None,
             logprobs: false,
             frequency_penalty: 0.0,
             max_tokens: None,
-            messages: Vec::new(),
-            model: "".into(),
+            messages,
+            model,
             n: 1,
             presence_penalty: 0.0,
             response_format: ResponseFormat {
@@ -48,7 +49,7 @@ impl RequestBuilder {
             top_logprobs: None,
             top_p: 1.0,
             user: None,
-        }
+        })
     }
 
     pub fn build(self) -> Request {
@@ -94,9 +95,10 @@ impl RequestBuilder {
         self
     }
 
-    pub fn with_messages(mut self, msgs: Vec<Message>) -> Self {
+    pub fn with_messages(mut self, msgs: Vec<Message>) -> anyhow::Result<Self> {
+        anyhow::ensure!(msgs.len() > 0, "message cannot be empty");
         self.messages = msgs;
-        self
+        Ok(self)
     }
 
     pub fn with_model(mut self, model: &str) -> Self {
