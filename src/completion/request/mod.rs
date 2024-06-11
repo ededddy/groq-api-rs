@@ -56,15 +56,22 @@ pub struct ResponseFormat {
 #[cfg(test)]
 mod request_test {
     use crate::completion::request::*;
+    use anyhow::Context;
 
     #[test]
-    fn init_request() {
+    fn init_request() -> anyhow::Result<()> {
+        let messages = vec![Message::UserMessage {
+            content: None,
+            name: None,
+            role: None,
+            tool_call_id: None,
+        }];
         let target = Request {
             logit_bias: None,
             logprobs: false,
             frequency_penalty: 0.0,
             max_tokens: None,
-            messages: Vec::new(),
+            messages: messages.clone(),
             model: "".into(),
             n: 1,
             presence_penalty: 0.0,
@@ -81,22 +88,31 @@ mod request_test {
             top_p: 1.0,
             user: None,
         };
-        let req2 = builder::RequestBuilder::new().build();
+        let req2 = builder::RequestBuilder::new("".into(), messages)
+            .context("the message vec should contain at least 1 Message")?
+            .build();
 
         assert_eq!(
             serde_json::to_string(&target).unwrap(),
             serde_json::to_string(&req2).unwrap()
         );
+        Ok(())
     }
 
     #[test]
-    fn with_stop_enum() {
+    fn with_stop_enum() -> anyhow::Result<()> {
+        let messages = vec![Message::UserMessage {
+            content: None,
+            name: None,
+            role: None,
+            tool_call_id: None,
+        }];
         let mut target = Request {
             logit_bias: None,
             logprobs: false,
             frequency_penalty: 0.0,
             max_tokens: None,
-            messages: Vec::new(),
+            messages: messages.clone(),
             model: "".into(),
             n: 1,
             presence_penalty: 0.0,
@@ -113,20 +129,27 @@ mod request_test {
             top_p: 1.0,
             user: None,
         };
-        let req2 = builder::RequestBuilder::new().with_stop("endline").build();
+        let req2 = builder::RequestBuilder::new("".to_string(), messages.clone())
+            .context("the messages vec should be at least 1")?
+            .with_stop("endline")
+            .build();
 
         let out_json = serde_json::to_string(&req2).unwrap();
         assert_eq!(serde_json::to_string(&target).unwrap(), out_json);
         let stops = vec!["endline".to_string()];
         target.stop = Some(StopEnum::Tokens(stops.clone()));
-        let req2 = builder::RequestBuilder::new().with_stops(stops).build();
+        let req2 = builder::RequestBuilder::new("".into(), messages)
+            .context("the message vec should contain at least 1 Message")?
+            .with_stops(stops)
+            .build();
 
         let out_json = serde_json::to_string(&req2).unwrap();
         assert_eq!(serde_json::to_string(&target).unwrap(), out_json);
+        Ok(())
     }
 
     #[test]
-    fn with_messages() {
+    fn with_messages() -> anyhow::Result<()> {
         let messages = vec![
             Message::UserMessage {
                 content: None,
@@ -176,8 +199,8 @@ mod request_test {
             top_p: 1.0,
             user: None,
         };
-        let req2 = builder::RequestBuilder::new()
-            .with_messages(messages)
+        let req2 = builder::RequestBuilder::new("".to_string(), messages)
+            .context("messages should be inserted to builder")?
             .build();
 
         let target_json = serde_json::to_string(&target).unwrap();
@@ -185,5 +208,6 @@ mod request_test {
         assert_eq!(target_json, out_json);
         println!("{:?}", target_json);
         println!("{:?}", out_json);
+        Ok(())
     }
 }
