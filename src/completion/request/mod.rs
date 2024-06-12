@@ -5,24 +5,44 @@ pub mod builder;
 #[derive(Debug, Serialize)]
 pub struct Request {
     // unused for openai integration only
+    #[serde(skip_serializing_if = "Option::is_none")]
     logit_bias: Option<serde_json::Value>,
+
     // unused for openai integration only
     logprobs: bool,         // default false
     frequency_penalty: f32, // defaults to 0
+    //
+    #[serde(skip_serializing_if = "Option::is_none")]
     max_tokens: Option<u32>,
+
     messages: Vec<Message>,
     model: String,
+
     n: u32,                          // defaults to 1
     presence_penalty: f32,           // defaults to 0
     response_format: ResponseFormat, // defaults to text,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     seed: Option<i32>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     stop: Option<StopEnum>,
+
     stream: bool,     // default false
     temperature: f32, // defaults to 1
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     tool_choice: Option<Tool>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     tools: Option<Vec<Tool>>,
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     top_logprobs: Option<u8>,
+
     top_p: f32, // defaults to 1
+
+    #[serde(skip_serializing_if = "Option::is_none")]
     user: Option<String>,
 }
 
@@ -206,8 +226,6 @@ mod request_test {
         let target_json = serde_json::to_string(&target).unwrap();
         let out_json = serde_json::to_string(&req2).unwrap();
         assert_eq!(target_json, out_json);
-        println!("{:?}", target_json);
-        println!("{:?}", out_json);
         Ok(())
     }
 }

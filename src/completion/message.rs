@@ -4,28 +4,45 @@ use serde::Serialize;
 #[serde(untagged)]
 pub enum Message {
     SystemMessage {
+        #[serde(skip_serializing_if = "Option::is_none")]
         content: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         name: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         role: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         tool_call_id: Option<String>,
     },
     UserMessage {
+        #[serde(skip_serializing_if = "Option::is_none")]
         content: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         name: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         role: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         tool_call_id: Option<String>,
     },
     AssistantMessage {
+        #[serde(skip_serializing_if = "Option::is_none")]
         content: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         name: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         role: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         tool_calls: Option<Vec<ToolCall>>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         tool_call_id: Option<String>,
     },
     ToolMessage {
+        #[serde(skip_serializing_if = "Option::is_none")]
         content: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         name: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         role: Option<String>,
+        #[serde(skip_serializing_if = "Option::is_none")]
         tool_call_id: Option<String>,
     },
 }
