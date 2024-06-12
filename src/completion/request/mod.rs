@@ -45,6 +45,11 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     user: Option<String>,
 }
+impl Request {
+    pub fn is_stream(&self) -> bool {
+        self.stream
+    }
+}
 
 #[derive(Debug, Serialize)]
 #[serde(untagged)]
