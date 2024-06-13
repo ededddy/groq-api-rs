@@ -1,4 +1,4 @@
-use super::{Message, Request, ResponseFormat, StopEnum, Tool};
+use super::{Message, Request, ResponseFormat, StopEnum, Tool, ToolChoiceEnum};
 use serde_json::Value;
 
 #[derive(Debug)]
@@ -18,7 +18,7 @@ pub struct RequestBuilder {
     stop: Option<StopEnum>,
     stream: bool,     // default false
     temperature: f32, // defaults to 1
-    tool_choice: Option<Tool>,
+    tool_choice: Option<ToolChoiceEnum>,
     tools: Option<Vec<Tool>>,
     top_logprobs: Option<u8>,
     top_p: f32, // defaults to 1
@@ -147,7 +147,11 @@ impl RequestBuilder {
     }
 
     pub fn with_tool_choice(mut self, tool: Tool) -> Self {
-        self.tool_choice = Some(tool);
+        self.tool_choice = Some(ToolChoiceEnum::Tool(tool));
+        self
+    }
+    pub fn with_auto_tool_choice(mut self) -> Self {
+        self.tool_choice = Some(ToolChoiceEnum::Str("auto".into()));
         self
     }
 
