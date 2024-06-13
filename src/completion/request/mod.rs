@@ -32,7 +32,7 @@ pub struct Request {
     temperature: f32, // defaults to 1
 
     #[serde(skip_serializing_if = "Option::is_none")]
-    tool_choice: Option<Tool>,
+    tool_choice: Option<ToolChoiceEnum>,
 
     #[serde(skip_serializing_if = "Option::is_none")]
     tools: Option<Vec<Tool>>,
@@ -49,6 +49,13 @@ impl Request {
     pub fn is_stream(&self) -> bool {
         self.stream
     }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(untagged)]
+pub enum ToolChoiceEnum {
+    Str(String),
+    Tool(Tool),
 }
 
 #[derive(Debug, Serialize)]
