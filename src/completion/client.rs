@@ -161,4 +161,25 @@ mod completion_test {
         assert!(res.is_ok());
         Ok(())
     }
+
+    #[tokio::test]
+    async fn error_does_return() -> anyhow::Result<()> {
+        let messages = vec![Message::UserMessage {
+            role: Some("user".to_string()),
+            content: Some("Explain the importance of fast language models".to_string()),
+            name: None,
+            tool_call_id: None,
+        }];
+        let request =
+            builder::RequestBuilder::new("mixtral-8x7b-32768".to_string()).with_stream(true);
+        let api_key = "";
+
+        let client = Groq::new(api_key);
+        let client = client.add_messages(messages);
+
+        let res = client.create(request).await;
+        assert!(res.is_err());
+        eprintln!("{}", res.unwrap_err());
+        Ok(())
+    }
 }
