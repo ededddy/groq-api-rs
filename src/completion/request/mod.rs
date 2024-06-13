@@ -92,18 +92,12 @@ mod request_test {
 
     #[test]
     fn init_request() -> anyhow::Result<()> {
-        let messages = vec![Message::UserMessage {
-            content: None,
-            name: None,
-            role: None,
-            tool_call_id: None,
-        }];
         let target = Request {
             logit_bias: None,
             logprobs: false,
             frequency_penalty: 0.0,
             max_tokens: None,
-            messages: messages.clone(),
+            messages: Vec::new(),
             model: "".into(),
             n: 1,
             presence_penalty: 0.0,
@@ -120,9 +114,7 @@ mod request_test {
             top_p: 1.0,
             user: None,
         };
-        let req2 = builder::RequestBuilder::new("".into(), messages)
-            .context("the message vec should contain at least 1 Message")?
-            .build();
+        let req2 = builder::RequestBuilder::new("".into()).build();
 
         assert_eq!(
             serde_json::to_string(&target).unwrap(),
@@ -133,18 +125,12 @@ mod request_test {
 
     #[test]
     fn with_stop_enum() -> anyhow::Result<()> {
-        let messages = vec![Message::UserMessage {
-            content: None,
-            name: None,
-            role: None,
-            tool_call_id: None,
-        }];
         let mut target = Request {
             logit_bias: None,
             logprobs: false,
             frequency_penalty: 0.0,
             max_tokens: None,
-            messages: messages.clone(),
+            messages: Vec::new(),
             model: "".into(),
             n: 1,
             presence_penalty: 0.0,
@@ -161,83 +147,20 @@ mod request_test {
             top_p: 1.0,
             user: None,
         };
-        let req2 = builder::RequestBuilder::new("".to_string(), messages.clone())
-            .context("the messages vec should be at least 1")?
+        let req2 = builder::RequestBuilder::new("".to_string())
             .with_stop("endline")
             .build();
 
         let out_json = serde_json::to_string(&req2).unwrap();
         assert_eq!(serde_json::to_string(&target).unwrap(), out_json);
+
         let stops = vec!["endline".to_string()];
         target.stop = Some(StopEnum::Tokens(stops.clone()));
-        let req2 = builder::RequestBuilder::new("".into(), messages)
-            .context("the message vec should contain at least 1 Message")?
+        let req2 = builder::RequestBuilder::new("".into())
             .with_stops(stops)
             .build();
-
         let out_json = serde_json::to_string(&req2).unwrap();
         assert_eq!(serde_json::to_string(&target).unwrap(), out_json);
-        Ok(())
-    }
-
-    #[test]
-    fn with_messages() -> anyhow::Result<()> {
-        let messages = vec![
-            Message::UserMessage {
-                content: None,
-                name: None,
-                role: None,
-                tool_call_id: None,
-            },
-            Message::SystemMessage {
-                content: None,
-                name: None,
-                role: None,
-                tool_call_id: None,
-            },
-            Message::AssistantMessage {
-                content: None,
-                name: None,
-                role: None,
-                tool_call_id: None,
-                tool_calls: None,
-            },
-            Message::ToolMessage {
-                content: None,
-                name: None,
-                role: None,
-                tool_call_id: None,
-            },
-        ];
-        let target = Request {
-            logit_bias: None,
-            logprobs: false,
-            frequency_penalty: 0.0,
-            max_tokens: None,
-            messages: messages.clone(),
-            model: "".into(),
-            n: 1,
-            presence_penalty: 0.0,
-            response_format: ResponseFormat {
-                response_type: "text".into(),
-            },
-            seed: None,
-            stop: None,
-            stream: false,
-            temperature: 1.0,
-            tool_choice: None,
-            tools: None,
-            top_logprobs: None,
-            top_p: 1.0,
-            user: None,
-        };
-        let req2 = builder::RequestBuilder::new("".to_string(), messages)
-            .context("messages should be inserted to builder")?
-            .build();
-
-        let target_json = serde_json::to_string(&target).unwrap();
-        let out_json = serde_json::to_string(&req2).unwrap();
-        assert_eq!(target_json, out_json);
         Ok(())
     }
 }
