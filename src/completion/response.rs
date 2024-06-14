@@ -2,6 +2,9 @@ use chrono::{serde::ts_seconds, Utc};
 use serde::Deserialize;
 use std::fmt::Display;
 
+/// Response object responsible for representing error object returned
+/// # Difference from groq's
+/// - Added Status Code field for convenience
 #[derive(Debug, Deserialize, Clone)]
 pub struct ErrorResponse {
     pub error: ErrorBody,
@@ -22,6 +25,9 @@ pub struct ErrorBody {
     pub message: String,
 }
 
+/// Response object responsible for representing completion chunk object returned
+/// # Difference from standard completion object
+/// - The x_groq struct contains the server stream event ID and usage info at the last message
 #[derive(Debug, Deserialize, Clone)]
 pub struct StreamResponse {
     pub id: String,
@@ -55,6 +61,7 @@ pub struct XGroq {
     pub usage: Option<UsageInfo>,
 }
 
+/// Response object responsible for representing completion object returned
 #[derive(Debug, Deserialize, Clone)]
 pub struct Response {
     pub id: String,

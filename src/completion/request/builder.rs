@@ -1,6 +1,11 @@
 use super::{Message, Request, ResponseFormat, StopEnum, Tool, ToolChoiceEnum};
 use serde_json::Value;
 
+/// Provides fluent api for building the request object for chat completion
+///
+/// The field types, defaults and description could be found from [the official doc](https://console.groq.com/docs/api-reference#chat-create)
+///
+/// Here and [Request](../../request/struct.Request.html) just a 1:1 mapping from it
 #[derive(Debug)]
 pub struct RequestBuilder {
     // unused for openai integration only
@@ -27,6 +32,37 @@ pub struct RequestBuilder {
 
 impl RequestBuilder {
     pub fn new(model: String) -> Self {
+        //! # Important Note
+        //! The builder method of modifying messages filed is hidden because the reposibility is
+        //! shifted to the client struct.
+        //! such that the client struct can maintain the message history and can be reused.
+        //!
+        //! # Description
+        //! Instantiates a RequestBuilder struct with a set of default values for the request object of groq chat completion API.
+        //! ```no_run
+        //! Self {
+        //!    logit_bias: None,
+        //!    logprobs: false,
+        //!    frequency_penalty: 0.0,
+        //!    max_tokens: None,
+        //!    messages: Vec::new(),
+        //!    model,
+        //!    n: 1,
+        //!    presence_penalty: 0.0,
+        //!    response_format: ResponseFormat {
+        //!        response_type: "text".into(),
+        //!    },
+        //!    seed: None,
+        //!    stop: None,
+        //!    stream: false,
+        //!    temperature: 1.0,
+        //!    tool_choice: None,
+        //!    tools: None,
+        //!    top_logprobs: None,
+        //!    top_p: 1.0,
+        //!    user: None,
+        //!}
+        //!```
         Self {
             logit_bias: None,
             logprobs: false,
@@ -175,6 +211,9 @@ impl RequestBuilder {
     }
 
     pub fn is_stream(&self) -> bool {
+        //! Check the request object is set to use stream for the completion response or not
+        //! - true if the stream flag is on
+        //! - false if the stream flag is off
         self.stream
     }
 }
