@@ -29,11 +29,11 @@ pub struct Groq {
 impl Groq {
     pub fn new(api_key: &str) -> Self {
         //! Returns an instance of Groq struct.
-        //! ```no_run
+        //! ```ignore no_run
         //! Self {
-        //!     api_key: api_key.into() // the API key used to authenticate with groq,
-        //!     client: reqwest::Client::new() // the reqwest::Client with built in connection pool,
-        //!     messages: Vec::new() // a Vec for containing messages send to the groq completion endpoint (historic messages will not clear after request),
+        //!     api_key: api_key.into(), // the API key used to authenticate with groq
+        //!     client: reqwest::Client::new(), // the reqwest::Client with built in connection pool
+        //!     messages: Vec::new() // a Vec for containing messages send to the groq completion endpoint (historic messages will not clear after request)
         //! }
         //! ```
         Self {

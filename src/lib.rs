@@ -14,7 +14,7 @@
 //! # Example
 //! Request a completion object from Groq
 //! ```
-//! use crate::completion::{client::Groq, message::Message, request::builder};
+//! use groq_api_rs::completion::{client::Groq, message::Message, request::builder};
 //!
 //! async fn create_completion() -> anyhow::Result<()> {
 //!     let messages = vec![Message::UserMessage {
@@ -37,7 +37,7 @@
 //!
 //! Request a completion chunk object from Groq using stream option implemented with SSE
 //! ```
-//! use crate::completion::{client::Groq, message::Message, request::builder};
+//! use groq_api_rs::completion::{client::Groq, message::Message, request::builder};
 //! async fn create_stream_completion() -> anyhow::Result<()> {
 //!     let messages = vec![Message::UserMessage {
 //!         role: Some("user".to_string()),
@@ -60,7 +60,7 @@
 //!
 //! Example that the completion can return Error Object and augmented with HTTP status code.
 //! ```
-//! use crate::completion::{client::Groq, message::Message, request::builder};
+//! use groq_api_rs::completion::{client::Groq, message::Message, request::builder};
 //! async fn error_does_return() -> anyhow::Result<()> {
 //!     let messages = vec![Message::UserMessage {
 //!         role: Some("user".to_string()),

@@ -39,7 +39,7 @@ impl RequestBuilder {
         //!
         //! # Description
         //! Instantiates a RequestBuilder struct with a set of default values for the request object of groq chat completion API.
-        //! ```no_run
+        //! ```ignore no_run
         //! Self {
         //!    logit_bias: None,
         //!    logprobs: false,
