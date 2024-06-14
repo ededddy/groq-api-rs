@@ -3,6 +3,14 @@
 //! This crate uses [`reqwest`], [`reqwest_eventsource`], [`tokio`], [`serde`], [`serde_json`], [`anyhow`],
 //! [`chrono`],[`futures`]
 //!
+//! # MSRV
+//! 1.78.0
+//!
+//! # Usage
+//! ```sh
+//! cargo add groq-api-rs
+//! ```
+//!
 //! # Example
 //! Request a completion object from Groq
 //! ```
