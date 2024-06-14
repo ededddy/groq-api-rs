@@ -2,6 +2,16 @@
 name = "groq-api-rs"
 version = "0.1.0"
 edition = "2021"
+authors = ["ededddy <eddylei070300@gmail.com>"]
+license = "MIT OR Apache-2.0"
+readme = "README.md"
+homepage = "https://github.com/ededddy/groq-api-rs"
+documentation = "https://docs.rs/groq-api-rs/"
+repository = "https://github.com/ededddy/groq-api-rs"
+description = "Client For Groq Cloud LLM APIs"
+keywords = ["groq api", "groq", "llm", "reqwest", "stream", "tokio"]
+categories = ["api-bindings", "web-programming", "asynchronous"]
+
 
 [dependencies]
 reqwest = { version = "0.12", features = ["json"] }

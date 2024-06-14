@@ -1,6 +1,6 @@
 use super::{
     message::Message,
-    request::{self, Request},
+    request,
     response::{ErrorResponse, Response},
 };
 use crate::completion::response::StreamResponse;
@@ -9,11 +9,17 @@ use reqwest::header;
 use reqwest_eventsource::{Event, EventSource};
 
 #[derive(Debug, Clone)]
+/// The returned response from groq's completion API could either be a json with full llm response
+/// or chunks of response sent via Server Sent Event(SSE)
 pub enum CompletionOption {
     NonStream(Response),
     Stream(Vec<StreamResponse>),
 }
 
+/// # Private Fields
+/// - api_key, the API key used to authenticate with groq,
+/// - client, the reqwest::Client with built in connection pool,
+/// - messages,  a Vec for containing messages send to the groq completion endpoint (historic messages will not clear after request)
 pub struct Groq {
     api_key: String,
     messages: Vec<Message>,
@@ -21,7 +27,15 @@ pub struct Groq {
 }
 
 impl Groq {
-    fn new(api_key: &str) -> Self {
+    pub fn new(api_key: &str) -> Self {
+        //! Returns an instance of Groq struct.
+        //! ```no_run
+        //! Self {
+        //!     api_key: api_key.into() // the API key used to authenticate with groq,
+        //!     client: reqwest::Client::new() // the reqwest::Client with built in connection pool,
+        //!     messages: Vec::new() // a Vec for containing messages send to the groq completion endpoint (historic messages will not clear after request),
+        //! }
+        //! ```
         Self {
             api_key: api_key.into(),
             client: reqwest::Client::new(),
@@ -29,17 +43,21 @@ impl Groq {
         }
     }
 
-    fn add_message(mut self, msg: Message) -> Self {
+    pub fn add_message(mut self, msg: Message) -> Self {
+        //! Adds a message to the internal message vector
         self.messages.push(msg);
         self
     }
 
-    fn add_messages(mut self, msgs: Vec<Message>) -> Self {
+    pub fn add_messages(mut self, msgs: Vec<Message>) -> Self {
+        //! Add messages to the internal message vector
         self.messages.extend(msgs);
         self
     }
 
-    fn clear_messages(mut self) -> Self {
+    pub fn clear_messages(mut self) -> Self {
+        //! Clears the internal message vector.
+        //! And shrink the capacity to 3.
         self.messages.clear();
         self.messages.shrink_to(3);
         self

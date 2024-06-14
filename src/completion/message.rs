@@ -1,5 +1,10 @@
 use serde::Serialize;
 
+/// 1:1 Mapping for Message Object used in the `messages` field groq completion API.
+///
+/// Refer to [the official documentations](https://console.groq.com/docs/api-reference#chat-create)
+/// for more details
+///
 #[derive(Debug, Serialize, Clone)]
 #[serde(untagged)]
 pub enum Message {
