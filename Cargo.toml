@@ -9,7 +9,7 @@ homepage = "https://github.com/ededddy/groq-api-rs"
 documentation = "https://docs.rs/groq-api-rs/"
 repository = "https://github.com/ededddy/groq-api-rs"
 description = "Client For Groq Cloud LLM APIs"
-keywords = ["groq api", "groq", "llm", "reqwest"]
+keywords = ["groq-api", "groq", "llm", "reqwest"]
 categories = ["api-bindings", "web-programming", "asynchronous"]
 
 
