@@ -83,3 +83,7 @@ async fn error_does_return() -> anyhow::Result<()> {
     Ok(())
 }
 ```
+
+# Contribute
+Feel free to open issues and PRs. I am still learning Rust, the design
+and coding might not be good.
