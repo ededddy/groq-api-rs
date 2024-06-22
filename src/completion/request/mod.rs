@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 use super::message::Message;
 use serde::Serialize;
 pub mod builder;
@@ -45,27 +47,50 @@ pub struct Request {
     #[serde(skip_serializing_if = "Option::is_none")]
     user: Option<String>,
 }
+
+impl Hash for Request {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.logprobs.hash(state);
+        ((self.frequency_penalty) as i32).hash(state);
+        self.max_tokens.hash(state);
+        self.messages.hash(state);
+        self.model.hash(state);
+        self.n.hash(state);
+        ((self.presence_penalty) as i32).hash(state);
+        self.response_format.hash(state);
+        self.seed.hash(state);
+        self.stop.hash(state);
+        self.stream.hash(state);
+        ((self.temperature) as i32).hash(state);
+        self.tool_choice.hash(state);
+        self.tools.hash(state);
+        self.top_logprobs.hash(state);
+        ((self.top_p) as i32).hash(state);
+        self.user.hash(state);
+    }
+}
+
 impl Request {
     pub fn is_stream(&self) -> bool {
         self.stream
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Hash)]
 #[serde(untagged)]
 pub enum ToolChoiceEnum {
     Str(String),
     Tool(Tool),
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Hash)]
 #[serde(untagged)]
 pub enum StopEnum {
     Token(String),
     Tokens(Vec<String>),
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Hash)]
 pub struct Tool {
     #[serde(rename(serialize = "type"))]
     pub tool_type: String,
@@ -79,7 +104,14 @@ pub struct Function {
     pub parameters: Option<serde_json::Value>,
 }
 
-#[derive(Debug, Serialize)]
+impl Hash for Function {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.description.hash(state);
+        self.name.hash(state);
+    }
+}
+
+#[derive(Debug, Serialize, Hash)]
 pub struct ResponseFormat {
     #[serde(rename(serialize = "type"))]
     pub response_type: String,

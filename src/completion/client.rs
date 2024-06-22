@@ -1,3 +1,5 @@
+use std::hash::{Hash, Hasher};
+
 use super::{
     message::Message,
     request,
@@ -20,6 +22,7 @@ pub enum CompletionOption {
 /// - api_key, the API key used to authenticate with groq,
 /// - client, the reqwest::Client with built in connection pool,
 /// - messages,  a Vec for containing messages send to the groq completion endpoint (historic messages will not clear after request)
+#[derive(Debug, Clone)]
 pub struct Groq {
     api_key: String,
     messages: Vec<Message>,
@@ -137,9 +140,49 @@ impl Groq {
     }
 }
 
+impl Hash for Groq {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.messages.hash(state);
+        self.api_key.hash(state);
+    }
+}
+
 #[cfg(test)]
 mod completion_test {
+    use std::hash::{DefaultHasher, Hash, Hasher};
+
     use crate::completion::{client::Groq, message::Message, request::builder};
+
+    #[test]
+    fn test_eq_and_hash() {
+        let g1 = Groq::new("api_key").add_messages(vec![Message::UserMessage {
+            role: Some("user".to_string()),
+            content: Some("Explain the importance of fast language models".to_string()),
+            name: None,
+            tool_call_id: None,
+        }]);
+
+        let g2 = Groq::new("api_key").add_messages(vec![Message::UserMessage {
+            role: Some("user".to_string()),
+            content: Some("Explain the importance of fast language models".to_string()),
+            name: None,
+            tool_call_id: None,
+        }]);
+
+        let mut hasher = DefaultHasher::new();
+        let mut hasher1 = DefaultHasher::new();
+
+        g1.api_key.hash(&mut hasher);
+        g1.messages.hash(&mut hasher);
+
+        g2.api_key.hash(&mut hasher1);
+        g2.messages.hash(&mut hasher1);
+
+        let hash_string = hasher.finish().to_string();
+        let hash_string1 = hasher1.finish().to_string();
+
+        assert_eq!(hash_string, hash_string1);
+    }
 
     #[tokio::test]
     async fn create_completion() -> anyhow::Result<()> {

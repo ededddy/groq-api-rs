@@ -5,7 +5,7 @@ use serde::Serialize;
 /// Refer to [the official documentations](https://console.groq.com/docs/api-reference#chat-create)
 /// for more details
 ///
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, Hash)]
 #[serde(untagged)]
 pub enum Message {
     SystemMessage {
@@ -52,7 +52,7 @@ pub enum Message {
     },
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, Hash)]
 pub struct ToolCall {
     pub id: Option<String>,
     #[serde(rename(serialize = "type"))]
@@ -60,7 +60,7 @@ pub struct ToolCall {
     pub function: AssistantFunc,
 }
 
-#[derive(Debug, Serialize, Clone)]
+#[derive(Debug, Serialize, Clone, Hash)]
 pub struct AssistantFunc {
     pub arguments: Option<String>,
     pub name: Option<String>,
