@@ -1,3 +1,5 @@
+use std::hash::Hash;
+
 use super::{Message, Request, ResponseFormat, StopEnum, Tool, ToolChoiceEnum};
 use serde_json::Value;
 
@@ -28,6 +30,28 @@ pub struct RequestBuilder {
     top_logprobs: Option<u8>,
     top_p: f32, // defaults to 1
     user: Option<String>,
+}
+
+impl Hash for RequestBuilder {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.logprobs.hash(state);
+        ((self.frequency_penalty) as i32).hash(state);
+        self.max_tokens.hash(state);
+        self.messages.hash(state);
+        self.model.hash(state);
+        self.n.hash(state);
+        ((self.presence_penalty) as i32).hash(state);
+        self.response_format.hash(state);
+        self.seed.hash(state);
+        self.stop.hash(state);
+        self.stream.hash(state);
+        ((self.temperature) as i32).hash(state);
+        self.tool_choice.hash(state);
+        self.tools.hash(state);
+        self.top_logprobs.hash(state);
+        ((self.top_p) as i32).hash(state);
+        self.user.hash(state);
+    }
 }
 
 impl RequestBuilder {
