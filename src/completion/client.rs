@@ -172,14 +172,10 @@ mod completion_test {
         let mut hasher = DefaultHasher::new();
         let mut hasher1 = DefaultHasher::new();
 
-        g1.api_key.hash(&mut hasher);
-        g1.messages.hash(&mut hasher);
-
-        g2.api_key.hash(&mut hasher1);
-        g2.messages.hash(&mut hasher1);
-
-        let hash_string = hasher.finish().to_string();
-        let hash_string1 = hasher1.finish().to_string();
+        g1.hash(&mut hasher);
+        g2.hash(&mut hasher1);
+        let hash_string = hasher.finish();
+        let hash_string1 = hasher1.finish();
 
         assert_eq!(hash_string, hash_string1);
     }
