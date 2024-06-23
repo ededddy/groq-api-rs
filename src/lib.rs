@@ -27,7 +27,7 @@
 //!     let api_key = env!("GROQ_API_KEY");
 //!
 //!     let client = Groq::new(api_key);
-//!     let client = client.add_messages(messages);
+//!     let mut client = client.add_messages(messages);
 //!
 //!     let res = client.create(request).await;
 //!     assert!(res.is_ok());
@@ -50,7 +50,7 @@
 //!     let api_key = env!("GROQ_API_KEY");
 //!
 //!     let client = Groq::new(api_key);
-//!     let client = client.add_messages(messages);
+//!     let mut client = client.add_messages(messages);
 //!
 //!     let res = client.create(request).await;
 //!     assert!(res.is_ok());
@@ -73,7 +73,7 @@
 //!     let api_key = "";
 //!
 //!     let client = Groq::new(api_key);
-//!     let client = client.add_messages(messages);
+//!     let mut client = client.add_messages(messages);
 //!
 //!     let res = client.create(request).await;
 //!     assert!(res.is_err());
