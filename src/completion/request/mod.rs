@@ -76,28 +76,28 @@ impl Request {
     }
 }
 
-#[derive(Debug, Serialize, Hash)]
+#[derive(Debug, Serialize, Hash, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum ToolChoiceEnum {
     Str(String),
     Tool(Tool),
 }
 
-#[derive(Debug, Serialize, Hash)]
+#[derive(Debug, Serialize, Hash, Clone, PartialEq)]
 #[serde(untagged)]
 pub enum StopEnum {
     Token(String),
     Tokens(Vec<String>),
 }
 
-#[derive(Debug, Serialize, Hash)]
+#[derive(Debug, Serialize, Hash, Clone, PartialEq)]
 pub struct Tool {
     #[serde(rename(serialize = "type"))]
     pub tool_type: String,
     pub function: Function,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone, PartialEq)]
 pub struct Function {
     pub description: Option<String>,
     pub name: Option<String>,
@@ -111,7 +111,7 @@ impl Hash for Function {
     }
 }
 
-#[derive(Debug, Serialize, Hash)]
+#[derive(Debug, Serialize, Hash, Clone, PartialEq)]
 pub struct ResponseFormat {
     #[serde(rename(serialize = "type"))]
     pub response_type: String,
