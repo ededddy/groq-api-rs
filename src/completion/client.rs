@@ -21,11 +21,13 @@ pub enum CompletionOption {
 /// # Private Fields
 /// - api_key, the API key used to authenticate with groq,
 /// - client, the reqwest::Client with built in connection pool,
+/// - tmp_messages, messages that stay there for only a single request. After the request they are cleared.
 /// - messages,  a Vec for containing messages send to the groq completion endpoint (historic messages will not clear after request)
 #[derive(Debug, Clone)]
 pub struct Groq {
     api_key: String,
     messages: Vec<Message>,
+    tmp_messages: Vec<Message>,
     client: reqwest::Client,
 }
 
@@ -42,6 +44,7 @@ impl Groq {
         Self {
             api_key: api_key.into(),
             client: reqwest::Client::new(),
+            tmp_messages: Vec::new(),
             messages: Vec::new(),
         }
     }
@@ -66,15 +69,60 @@ impl Groq {
         self
     }
 
+    /// Clears the internal tmp_messages vector.
+    /// # Note
+    /// Fucntion is created for internal use and is not recomended for external use.
+    pub fn clear_tmp_messages_override(&mut self) {
+        self.tmp_messages.clear();
+    }
+
+    pub fn add_tmp_messages(mut self, msgs: Vec<Message>) -> Self {
+        self.tmp_messages.extend(msgs);
+        self
+    }
+
+    pub fn add_tmp_message(mut self, msg: Message) -> Self {
+        self.tmp_messages.push(msg);
+        self
+    }
+
+    fn get_tmp_request_messages(&self) -> Option<Vec<Message>> {
+        if self.tmp_messages.is_empty() {
+            None
+        } else {
+            Some(self.tmp_messages.clone())
+        }
+    }
+
+    /// Outputs the request messages that should be passed onto the request.
+    /// Utility function created for easier logic internally.
+    fn get_all_request_messages(&self) -> Vec<Message> {
+        if self.tmp_messages.is_empty() {
+            self.messages.clone()
+        } else {
+            return vec![self.tmp_messages.clone(), self.messages.clone()].concat();
+        }
+    }
+
+    /// Outputs the request messages that should be passed onto the request and clears the tmp messages.
+    /// Utility function created for easier logic internally.
+    fn get_request_messages_with_tmp_clear(&mut self) -> Vec<Message> {
+        let all = self.get_all_request_messages();
+        self.clear_tmp_messages_override();
+        return all;
+    }
+
     async fn create_stream_completion(
-        &self,
+        &mut self,
         req: request::builder::RequestBuilder,
     ) -> anyhow::Result<CompletionOption> {
         /* REMARK:
          * https://github.com/jpopesculian/reqwest-eventsource/
          * https://parsec.cloud/en/how-the-reqwest-http-client-streams-responses-in-a-web-context/
          */
-        let req = req.with_messages(self.messages.clone())?.build();
+        let req = req
+            .with_messages(self.get_request_messages_with_tmp_clear())?
+            .build();
         anyhow::ensure!(
             req.is_stream(),
             "'create_stream_completion' func must have the stream flag turned on in request body"
@@ -108,10 +156,12 @@ impl Groq {
     }
 
     async fn create_non_stream_completion(
-        &self,
+        &mut self,
         req: request::builder::RequestBuilder,
     ) -> anyhow::Result<CompletionOption> {
-        let req = req.with_messages(self.messages.clone())?.build();
+        let req = req
+            .with_messages(self.get_request_messages_with_tmp_clear())?
+            .build();
         let body = (self.client)
             .post("https://api.groq.com/openai/v1/chat/completions")
             .header(header::AUTHORIZATION, format!("Bearer {}", self.api_key))
@@ -129,7 +179,7 @@ impl Groq {
     }
 
     pub async fn create(
-        &self,
+        &mut self,
         req: request::builder::RequestBuilder,
     ) -> anyhow::Result<CompletionOption> {
         if !req.is_stream() {
@@ -192,7 +242,7 @@ mod completion_test {
         let api_key = env!("GROQ_API_KEY");
 
         let client = Groq::new(api_key);
-        let client = client.add_messages(messages);
+        let mut client = client.add_messages(messages);
 
         let res = client.create(request).await;
         assert!(res.is_ok());
@@ -212,10 +262,11 @@ mod completion_test {
         let api_key = env!("GROQ_API_KEY");
 
         let client = Groq::new(api_key);
-        let client = client.add_messages(messages);
+        let mut client = client.add_messages(messages);
 
         let res = client.create(request).await;
         assert!(res.is_ok());
+        println!("{:?}", res.unwrap());
         Ok(())
     }
 
@@ -232,11 +283,39 @@ mod completion_test {
         let api_key = "";
 
         let client = Groq::new(api_key);
-        let client = client.add_messages(messages);
+        let mut client = client.add_messages(messages);
 
         let res = client.create(request).await;
         assert!(res.is_err());
         eprintln!("{}", res.unwrap_err());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn create_with_add_tmp_message() -> anyhow::Result<()> {
+        let messages = vec![Message::SystemMessage {
+            content: Some("I am a system message".to_string()),
+            name: None,
+            role: Some("system".to_string()),
+            tool_call_id: None,
+        }];
+        let request = builder::RequestBuilder::new("mixtral-8x7b-32768".to_string());
+        let api_key = env!("GROQ_API_KEY");
+
+        let client = Groq::new(api_key);
+        let mut client = client
+            .add_messages(messages)
+            .add_tmp_message(Message::UserMessage {
+                role: Some("user".to_string()),
+                content: Some("Explain the importance of fast language models".to_string()),
+                name: None,
+                tool_call_id: None,
+            });
+
+        assert!(client.get_tmp_request_messages().is_some());
+        let res = client.create(request).await;
+        assert!(!res.is_err());
+        assert!(client.get_tmp_request_messages().is_none());
         Ok(())
     }
 }
