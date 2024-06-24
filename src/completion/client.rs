@@ -72,21 +72,21 @@ impl Groq {
     /// Clears the internal tmp_messages vector.
     /// # Note
     /// Fucntion is created for internal use and is not recomended for external use.
-    pub fn clear_tmp_messages_override(&mut self) {
+    pub fn clear_disposable_msgs_override(&mut self) {
         self.disposable_msgs.clear();
     }
 
-    pub fn add_tmp_messages(mut self, msgs: Vec<Message>) -> Self {
+    pub fn add_disposable_msgs(mut self, msgs: Vec<Message>) -> Self {
         self.disposable_msgs.extend(msgs);
         self
     }
 
-    pub fn add_tmp_message(mut self, msg: Message) -> Self {
+    pub fn add_disposable_msg(mut self, msg: Message) -> Self {
         self.disposable_msgs.push(msg);
         self
     }
 
-    fn get_tmp_request_messages(&self) -> Option<Vec<Message>> {
+    fn get_disposable_msgs(&self) -> Option<Vec<Message>> {
         if self.disposable_msgs.is_empty() {
             None
         } else {
@@ -96,19 +96,21 @@ impl Groq {
 
     /// Outputs the request messages that should be passed onto the request.
     /// Utility function created for easier logic internally.
+    /// # Returns
+    /// - Vec<Message> in the form of vec!**<global messages, disposable messages>**
     fn get_all_request_messages(&self) -> Vec<Message> {
         if self.disposable_msgs.is_empty() {
             self.messages.clone()
         } else {
-            return vec![self.disposable_msgs.clone(), self.messages.clone()].concat();
+            return vec![self.messages.clone(), self.disposable_msgs.clone()].concat();
         }
     }
 
     /// Outputs the request messages that should be passed onto the request and clears the tmp messages.
     /// Utility function created for easier logic internally.
-    fn get_request_messages_with_tmp_clear(&mut self) -> Vec<Message> {
+    fn get_request_messages_with_disposable_clear(&mut self) -> Vec<Message> {
         let all = self.get_all_request_messages();
-        self.clear_tmp_messages_override();
+        self.clear_disposable_msgs_override();
         return all;
     }
 
@@ -121,7 +123,7 @@ impl Groq {
          * https://parsec.cloud/en/how-the-reqwest-http-client-streams-responses-in-a-web-context/
          */
         let req = req
-            .with_messages(self.get_request_messages_with_tmp_clear())?
+            .with_messages(self.get_request_messages_with_disposable_clear())?
             .build();
         anyhow::ensure!(
             req.is_stream(),
@@ -160,7 +162,7 @@ impl Groq {
         req: request::builder::RequestBuilder,
     ) -> anyhow::Result<CompletionOption> {
         let req = req
-            .with_messages(self.get_request_messages_with_tmp_clear())?
+            .with_messages(self.get_request_messages_with_disposable_clear())?
             .build();
         let body = (self.client)
             .post("https://api.groq.com/openai/v1/chat/completions")
@@ -305,17 +307,17 @@ mod completion_test {
         let client = Groq::new(api_key);
         let mut client = client
             .add_messages(messages)
-            .add_tmp_message(Message::UserMessage {
+            .add_disposable_msg(Message::UserMessage {
                 role: Some("user".to_string()),
                 content: Some("Explain the importance of fast language models".to_string()),
                 name: None,
                 tool_call_id: None,
             });
 
-        assert!(client.get_tmp_request_messages().is_some());
+        assert!(client.get_disposable_msgs().is_some());
         let res = client.create(request).await;
         assert!(!res.is_err());
-        assert!(client.get_tmp_request_messages().is_none());
+        assert!(client.get_disposable_msgs().is_none());
         Ok(())
     }
 }
