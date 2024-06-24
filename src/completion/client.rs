@@ -27,7 +27,7 @@ pub enum CompletionOption {
 pub struct Groq {
     api_key: String,
     messages: Vec<Message>,
-    tmp_messages: Vec<Message>,
+    disposable_msgs: Vec<Message>,
     client: reqwest::Client,
 }
 
@@ -44,7 +44,7 @@ impl Groq {
         Self {
             api_key: api_key.into(),
             client: reqwest::Client::new(),
-            tmp_messages: Vec::new(),
+            disposable_msgs: Vec::new(),
             messages: Vec::new(),
         }
     }
@@ -73,34 +73,34 @@ impl Groq {
     /// # Note
     /// Fucntion is created for internal use and is not recomended for external use.
     pub fn clear_tmp_messages_override(&mut self) {
-        self.tmp_messages.clear();
+        self.disposable_msgs.clear();
     }
 
     pub fn add_tmp_messages(mut self, msgs: Vec<Message>) -> Self {
-        self.tmp_messages.extend(msgs);
+        self.disposable_msgs.extend(msgs);
         self
     }
 
     pub fn add_tmp_message(mut self, msg: Message) -> Self {
-        self.tmp_messages.push(msg);
+        self.disposable_msgs.push(msg);
         self
     }
 
     fn get_tmp_request_messages(&self) -> Option<Vec<Message>> {
-        if self.tmp_messages.is_empty() {
+        if self.disposable_msgs.is_empty() {
             None
         } else {
-            Some(self.tmp_messages.clone())
+            Some(self.disposable_msgs.clone())
         }
     }
 
     /// Outputs the request messages that should be passed onto the request.
     /// Utility function created for easier logic internally.
     fn get_all_request_messages(&self) -> Vec<Message> {
-        if self.tmp_messages.is_empty() {
+        if self.disposable_msgs.is_empty() {
             self.messages.clone()
         } else {
-            return vec![self.tmp_messages.clone(), self.messages.clone()].concat();
+            return vec![self.disposable_msgs.clone(), self.messages.clone()].concat();
         }
     }
 
