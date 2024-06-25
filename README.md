@@ -6,17 +6,21 @@ This crate uses [`reqwest`], [`reqwest_eventsource`], [`tokio`], [`serde`], [`se
 [`chrono`],[`futures`]
 
 # MSRV
+
 1.78.0
 
 # Usage
+
 ```sh
 cargo add groq-api-rs
 ```
 
 ## Example
+
 Request a completion object from Groq
+
 ```rust
-use crate::completion::{client::Groq, message::Message, request::builder};
+use groq_api_rs::completion::{client::Groq, message::Message, request::builder};
 
 async fn create_completion() -> anyhow::Result<()> {
     let messages = vec![Message::UserMessage {
@@ -28,8 +32,8 @@ async fn create_completion() -> anyhow::Result<()> {
     let request = builder::RequestBuilder::new("mixtral-8x7b-32768".to_string());
     let api_key = env!("GROQ_API_KEY");
 
-    let client = Groq::new(api_key);
-    let client = client.add_messages(messages);
+    let mut client = Groq::new(api_key);
+    client.add_messages(messages);
 
     let res = client.create(request).await;
     assert!(res.is_ok());
@@ -38,8 +42,9 @@ async fn create_completion() -> anyhow::Result<()> {
 ```
 
 Request a completion chunk object from Groq using stream option implemented with SSE
+
 ```rust
-use crate::completion::{client::Groq, message::Message, request::builder};
+use groq_api_rs::completion::{client::Groq, message::Message, request::builder};
 async fn create_stream_completion() -> anyhow::Result<()> {
     let messages = vec![Message::UserMessage {
         role: Some("user".to_string()),
@@ -51,8 +56,8 @@ async fn create_stream_completion() -> anyhow::Result<()> {
         builder::RequestBuilder::new("mixtral-8x7b-32768".to_string()).with_stream(true);
     let api_key = env!("GROQ_API_KEY");
 
-    let client = Groq::new(api_key);
-    let client = client.add_messages(messages);
+    let mut client = Groq::new(api_key);
+    client.add_messages(messages);
 
     let res = client.create(request).await;
     assert!(res.is_ok());
@@ -61,8 +66,9 @@ async fn create_stream_completion() -> anyhow::Result<()> {
 ```
 
 Example that the completion can return Error Object and augmented with HTTP status code.
+
 ```rust
-use crate::completion::{client::Groq, message::Message, request::builder};
+use groq_api_rs::completion::{client::Groq, message::Message, request::builder};
 async fn error_does_return() -> anyhow::Result<()> {
     let messages = vec![Message::UserMessage {
         role: Some("user".to_string()),
@@ -74,8 +80,8 @@ async fn error_does_return() -> anyhow::Result<()> {
         builder::RequestBuilder::new("mixtral-8x7b-32768".to_string()).with_stream(true);
     let api_key = "";
 
-    let client = Groq::new(api_key);
-    let client = client.add_messages(messages);
+    let mut client = Groq::new(api_key);
+    client.add_messages(messages);
 
     let res = client.create(request).await;
     assert!(res.is_err());
@@ -85,5 +91,6 @@ async fn error_does_return() -> anyhow::Result<()> {
 ```
 
 # Contribute
+
 Feel free to open issues and PRs. I am still learning Rust, the design
 and coding might not be good.
