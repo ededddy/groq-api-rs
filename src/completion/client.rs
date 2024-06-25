@@ -49,41 +49,42 @@ impl Groq {
         }
     }
 
-    pub fn add_message(mut self, msg: Message) -> Self {
+    pub fn add_message(&mut self, msg: Message) {
+        //! Non Consuming
         //! Adds a message to the internal message vector
         self.messages.push(msg);
-        self
     }
 
-    pub fn add_messages(mut self, msgs: Vec<Message>) -> Self {
+    pub fn add_messages(&mut self, msgs: Vec<Message>) {
+        //! Non Consuming
         //! Add messages to the internal message vector
         self.messages.extend(msgs);
-        self
     }
 
-    pub fn clear_messages(mut self) -> Self {
+    pub fn clear_messages(&mut self) {
+        //! Non Consuming
         //! Clears the internal message vector.
         //! And shrink the capacity to 3.
         self.messages.clear();
         self.messages.shrink_to(3);
-        self
     }
 
     /// Clears the internal tmp_messages vector.
     /// # Note
     /// Fucntion is created for internal use and is not recomended for external use.
     pub fn clear_disposable_msgs_override(&mut self) {
+        //! Non Consuming
         self.disposable_msgs.clear();
     }
 
-    pub fn add_disposable_msgs(mut self, msgs: Vec<Message>) -> Self {
+    pub fn add_disposable_msgs(&mut self, msgs: Vec<Message>) {
+        //! Non Consuming
         self.disposable_msgs.extend(msgs);
-        self
     }
 
-    pub fn add_disposable_msg(mut self, msg: Message) -> Self {
+    pub fn add_disposable_msg(&mut self, msg: Message) {
+        //! Non Consuming
         self.disposable_msgs.push(msg);
-        self
     }
 
     fn get_disposable_msgs(&self) -> Option<Vec<Message>> {
@@ -102,7 +103,7 @@ impl Groq {
         if self.disposable_msgs.is_empty() {
             self.messages.clone()
         } else {
-            return vec![self.messages.clone(), self.disposable_msgs.clone()].concat();
+            vec![self.messages.clone(), self.disposable_msgs.clone()].concat()
         }
     }
 
@@ -111,7 +112,7 @@ impl Groq {
     fn get_request_messages_with_disposable_clear(&mut self) -> Vec<Message> {
         let all = self.get_all_request_messages();
         self.clear_disposable_msgs_override();
-        return all;
+        all
     }
 
     async fn create_stream_completion(
@@ -173,7 +174,7 @@ impl Groq {
         if body.status() == reqwest::StatusCode::OK {
             Ok(CompletionOption::NonStream(body.json::<Response>().await?))
         } else {
-            let statcode = body.status().clone();
+            let statcode = body.status();
             let mut error: ErrorResponse = serde_json::from_str(&body.text().await?)?;
             error.code = statcode;
             anyhow::bail!(error)
@@ -243,8 +244,8 @@ mod completion_test {
         let request = builder::RequestBuilder::new("mixtral-8x7b-32768".to_string());
         let api_key = env!("GROQ_API_KEY");
 
-        let client = Groq::new(api_key);
-        let mut client = client.add_messages(messages);
+        let mut client = Groq::new(api_key);
+        client.add_messages(messages);
 
         let res = client.create(request).await;
         assert!(res.is_ok());
@@ -263,8 +264,8 @@ mod completion_test {
             builder::RequestBuilder::new("mixtral-8x7b-32768".to_string()).with_stream(true);
         let api_key = env!("GROQ_API_KEY");
 
-        let client = Groq::new(api_key);
-        let mut client = client.add_messages(messages);
+        let mut client = Groq::new(api_key);
+        client.add_messages(messages);
 
         let res = client.create(request).await;
         assert!(res.is_ok());
@@ -284,8 +285,8 @@ mod completion_test {
             builder::RequestBuilder::new("mixtral-8x7b-32768".to_string()).with_stream(true);
         let api_key = "";
 
-        let client = Groq::new(api_key);
-        let mut client = client.add_messages(messages);
+        let mut client = Groq::new(api_key);
+        client.add_messages(messages);
 
         let res = client.create(request).await;
         assert!(res.is_err());
@@ -305,14 +306,14 @@ mod completion_test {
         let api_key = env!("GROQ_API_KEY");
 
         let client = Groq::new(api_key);
-        let mut client = client
-            .add_messages(messages)
-            .add_disposable_msg(Message::UserMessage {
-                role: Some("user".to_string()),
-                content: Some("Explain the importance of fast language models".to_string()),
-                name: None,
-                tool_call_id: None,
-            });
+        let mut client = client;
+        client.add_messages(messages);
+        client.add_disposable_msg(Message::UserMessage {
+            role: Some("user".to_string()),
+            content: Some("Explain the importance of fast language models".to_string()),
+            name: None,
+            tool_call_id: None,
+        });
 
         assert!(client.get_disposable_msgs().is_some());
         let res = client.create(request).await;

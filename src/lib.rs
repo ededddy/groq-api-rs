@@ -26,8 +26,8 @@
 //!     let request = builder::RequestBuilder::new("mixtral-8x7b-32768".to_string());
 //!     let api_key = env!("GROQ_API_KEY");
 //!
-//!     let client = Groq::new(api_key);
-//!     let mut client = client.add_messages(messages);
+//!     let mut client = Groq::new(api_key);
+//!     client.add_messages(messages);
 //!
 //!     let res = client.create(request).await;
 //!     assert!(res.is_ok());
@@ -49,8 +49,8 @@
 //!         builder::RequestBuilder::new("mixtral-8x7b-32768".to_string()).with_stream(true);
 //!     let api_key = env!("GROQ_API_KEY");
 //!
-//!     let client = Groq::new(api_key);
-//!     let mut client = client.add_messages(messages);
+//!     let mut client = Groq::new(api_key);
+//!     client.add_messages(messages);
 //!
 //!     let res = client.create(request).await;
 //!     assert!(res.is_ok());
@@ -72,8 +72,8 @@
 //!         builder::RequestBuilder::new("mixtral-8x7b-32768".to_string()).with_stream(true);
 //!     let api_key = "";
 //!
-//!     let client = Groq::new(api_key);
-//!     let mut client = client.add_messages(messages);
+//!     let mut client = Groq::new(api_key);
+//!     client.add_messages(messages);
 //!
 //!     let res = client.create(request).await;
 //!     assert!(res.is_err());
