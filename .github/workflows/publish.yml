@@ -16,7 +16,7 @@ jobs:
     - name: Build
       run: cargo build --verbose
     - name: Run tests
-      run: cargo test --verbose
+      run: GROQ_API_KEY=${{ secrets.GROQ_API_TOKEN}} cargo test --verbose
 
   # reference : https://github.com/azriel91/peace/blob/main/.github/workflows/publish.yml
   crates_io_publish:
